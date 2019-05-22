@@ -1,0 +1,49 @@
+language: "en"
+
+pipeline: "tensorflow_embedding"
+
+data: | 
+
+  ## intent:beeb
+  - beeb
+  - hey beeb
+
+  ## intent:bad_robot
+  - stupid robot
+  - bad robot
+  - shut up
+
+  ## intent:good_robot
+  - good robot
+  - thank you
+  - please
+  - well done
+
+  ## intent:weather_today
+  - weather now
+  - weather like
+  - weather today
+
+  ## intent:radio_six_music
+  - six music
+  - radio six
+  - radio six music
+
+  ## intent:radio_six_music_please
+  - six music please
+  - radio six please
+  - radio six music please
+
+  ## intent:radio_one
+  - play radio one
+  - radio one
+
+  ## intent:radio_one_please
+  - radio one please
+  - play radio one please
+
+  ## intent:news_today
+  - news today
+  - the news
+  - todays news
+  - whats the news  

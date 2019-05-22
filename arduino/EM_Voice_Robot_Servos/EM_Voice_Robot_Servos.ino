@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////// 
-//This sketch contains 5 gesture animations for 3 servo motors, triggered by serial commands
+//This sketch contains 5 gesture animations for 3 servo motors, triggered by 5 seperate buttons-- 
 // written for user testing purposes for the Emotional Machines project -- 
-// Emma Young - BBC R&D
+// Emma Young - BBC R&D - emma.young02@bbc.co.uk
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <Servo.h>
@@ -33,11 +33,7 @@ int baseServoNeutral = 90;
 
 void setup() {
 
-  
-  Serial.begin(9600);
-  baseServo.attach(4);  // attaches the base servo on pin 5 to the servo object
-  midServo.attach(5);
-  topServo.attach(6);
+  //neutral handles detatch and attach
   neutral(); 
 
   //for debugging
@@ -94,13 +90,29 @@ void breathe(){
   
 
 void neutral() {
+  
+  baseServo.attach(4); 
+  midServo.attach(5);
+  topServo.attach(6);
+  delay(15);
   baseServo.write(baseServoNeutral);
   midServo.write(midServoNeutral);
   topServo.write(topServoNeutral);
+  delay(15);  
+  baseServo.detach();  
+  midServo.detach();
+  topServo.detach(); 
 }
 
 void curiosity() {
+
   neutral();
+
+  baseServo.attach(4);  
+  midServo.attach(5);
+  topServo.attach(6);  
+  delay(15);
+  
   midServo.write(midServoNeutral - 30);
   delay(1000);
   topServo.write(topServoMaxRight - 30);
@@ -135,10 +147,20 @@ void curiosity() {
     midServo.write(pos);
     delay(15);
   }
+
+  delay(15);
+  baseServo.detach();  
+  midServo.detach();
+  topServo.detach(); 
 }
 
 void frustration() {
+  
     neutral();
+    baseServo.attach(4); 
+    midServo.attach(5);
+    topServo.attach(6);
+    delay(15);
     midServo.write(midServoMaxForward - 70);
     delay(300);
     for (pos = topServoMaxLeft; pos <= topServoMaxRight; pos += 4) {
@@ -172,11 +194,19 @@ void frustration() {
       delay(15);
     }
     delay(100);
+    delay(15);  
+    baseServo.detach();  
+    midServo.detach();
+    topServo.detach(); 
     neutral();
 }
 
 void hesitancy() {
   neutral();
+  baseServo.attach(4); 
+  midServo.attach(5);
+  topServo.attach(6);
+  delay(15);
   midServo.write(midServoMaxBack);
   delay(1000);
   for (pos = (midServoMaxBack); pos <= (midServoNeutral + 20); pos += 1) {
@@ -212,10 +242,18 @@ void hesitancy() {
     midServo.write(pos);
     delay(15);
   }
+  delay(15);  
+  baseServo.detach();  
+  midServo.detach();
+  topServo.detach(); 
 }
 
 void joy() {
   neutral();
+  baseServo.attach(4); 
+  midServo.attach(5);
+  topServo.attach(6);
+  delay(15);
   midServo.write(midServoMaxBack);
   delay(15);
   for (pos = topServoMaxLeft; pos <= topServoMaxRight; pos += 1) {
@@ -248,10 +286,19 @@ void joy() {
     midServo.write(pos);
     delay(15);
   }
+  delay(15);  
+  baseServo.detach();  
+  midServo.detach();
+  topServo.detach(); 
 }
+
 
 void anticipation() {
   neutral();
+  baseServo.attach(4); 
+  midServo.attach(5);
+  topServo.attach(6);
+  delay(15);
   baseServo.write(baseServoNeutral - 40);
   delay(500);
   for (pos = (baseServoNeutral - 40); pos <= baseServoNeutral + 40; pos += 1) {
@@ -292,6 +339,9 @@ void anticipation() {
   }
   baseServo.write(baseServoNeutral);
   delay(700);
+  baseServo.detach();  
+  midServo.detach();
+  topServo.detach(); 
   neutral();
 }
 
