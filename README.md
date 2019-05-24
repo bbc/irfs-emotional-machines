@@ -10,6 +10,4 @@ Implementation requires a good internet connnection, as Chrome uses google's spe
 
 # Setup
 
-One servo is connected via USB, the other via serial, and it matters which!
-
-gkggk
+See photos
