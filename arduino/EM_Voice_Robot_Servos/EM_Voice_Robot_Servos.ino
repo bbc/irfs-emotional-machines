@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////////////////////////// 
-//This sketch contains 5 gesture animations for 3 servo motors, triggered by 5 seperate buttons-- 
-// written for user testing purposes for the Emotional Machines project -- 
-// Emma Young - BBC R&D - emma.young02@bbc.co.uk
+// This sketch contains 5 gesture animations for 3 servo motors, triggered over serial 
+// for a voice robot prototype created as part of the Emotional Machines project -- 
+// Emma Young & Libby Miller - BBC R&D - emma.young02@bbc.co.uk | libby.miller@bbc.co.uk
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <Servo.h>
@@ -18,27 +18,29 @@ int state = 0;
 // RANGE OF MOTION LIMITATIONS 
 // TOPSERVO - NEUTRAL  = 90 | MIN POS (LEFT)  = 50 | MAX POS (RIGHT) = 130 (for symmetry)
 // MIDSERVO - NEUTRAL = 35 | MIN POS (BACK) = 0 | MAX POS (FORWARD) = 180 (reverse mounting)
-// BASE SERVO - NEUTRAL = 90
-int topServoMaxLeft = 50;
-int topServoMaxRight = 130;
-int topServoNeutral = 80;
+// BASE SERVO - NEUTRAL = 180
+int topServoMaxLeft = 40;
+int topServoMaxRight = 100;
+int topServoNeutral = 70;
 
-int midServoMaxBack = 0;
-int midServoMaxForward = 180;
-int midServoNeutral = 35;
+int midServoMaxBack = 75;
+int midServoMaxForward = 130;
+int midServoNeutral = 100;
 
-int baseServoMaxLeft = 0; // flip if working in reverse on checking
-int baseServoMaxRight = 180; // "
-int baseServoNeutral = 90;
+//int baseServoMaxLeft = 0; // flip if working in reverse on checking
+int baseServoMaxBack = 180; // "
+int baseServoNeutral = 30;
+
+int baseServoPin = 4;
+int midServoPin = 5;
+int topServoPin = 6;
 
 void setup() {
+  Serial.begin(115200);
 
   //neutral handles detatch and attach
-  neutral(); 
-
-  //for debugging
-  Serial.begin(115200);
-  
+  neutral();
+   
 }
 void loop() {
    checkSerial();
@@ -56,9 +58,14 @@ void checkSerial(){
         Serial.println(str);
         String val = getValue(str, ' ', 0);
         int command = val.toInt();
+        if(command == 0){
+          Serial.println("neutral() invoked");
+          neutral();
+          delay(3000);      
+        }
         if(command == 1){
-          Serial.println("curiosity() invoked");
-          curiosity();
+          Serial.println("turnAway(); invoked");
+          turnAway();
           neutral();      
         }
         if(command == 2){
@@ -68,8 +75,8 @@ void checkSerial(){
         }
         if(command == 3){
           Serial.println("hesitancy(); invoked");
-          curiosity();
-          hesitancy();      
+          hesitancy();
+          neutral();      
         }
         if(command == 4){
           Serial.println("joy() invoked");
@@ -77,23 +84,22 @@ void checkSerial(){
           neutral();      
         }        
         if(command == 5){
-          Serial.println("anticipation invoked");
+          Serial.println("anticipation() invoked");
           anticipation();
+          neutral();      
+        }
+        if(command == 6){
+          Serial.println("curiosity() invoked");
+          curiosity();
           neutral();      
         }
     }  
 }
  
-void breathe(){
-  //do something - if having idle state?
-}
-  
-
 void neutral() {
-  
-  baseServo.attach(4); 
-  midServo.attach(5);
-  topServo.attach(6);
+  baseServo.attach(baseServoPin); 
+  midServo.attach(midServoPin);
+  topServo.attach(topServoPin);
   delay(15);
   baseServo.write(baseServoNeutral);
   midServo.write(midServoNeutral);
@@ -104,64 +110,85 @@ void neutral() {
   topServo.detach(); 
 }
 
+
+void turnAway() {
+  Serial.println("moving mid and base");
+  baseServo.attach(baseServoPin);
+  midServo.attach(midServoPin);
+
+  midServo.write(midServoMaxForward);
+  delay(500);
+
+  for (pos = baseServoNeutral; pos <= baseServoMaxBack; pos += 1) {
+    baseServo.write(pos);
+    delay(40);
+  }
+  delay(5000);
+  for (pos = baseServoMaxBack; pos <= baseServoNeutral; pos -= 1) {
+    baseServo.write(pos);
+    delay(40);
+  }
+  midServo.write(midServoNeutral);
+  delay(500);
+  
+  baseServo.detach();  
+  midServo.detach();
+}
 void curiosity() {
 
-  neutral();
+  baseServo.attach(baseServoPin);  
+  midServo.attach(midServoPin);
+  topServo.attach(topServoPin);
 
-  baseServo.attach(4);  
-  midServo.attach(5);
-  topServo.attach(6);  
-  delay(15);
+  neutral();
   
-  midServo.write(midServoNeutral - 30);
+  midServo.write(midServoNeutral - 20);
   delay(1000);
-  topServo.write(topServoMaxRight - 30);
+  topServo.write(topServoMaxRight);
   delay(1500);
   topServo.write(topServoNeutral);
   delay(600);
-  //topServo.write(topServoMaxRight - 20);
-  //delay(1000);
   midServo.write(midServoNeutral);
   delay(700);
-  topServo.write(topServoNeutral);
-  delay(600);
-  midServo.write(midServoNeutral + 10);
-  delay(600);
-  topServo.write(topServoMaxRight - 20);
-  delay(1500);
-  topServo.write(topServoNeutral);
-  delay(600);
-  midServo.write(midServoNeutral + 30);
-  delay(500);
   topServo.write(topServoMaxLeft + 20);
-  delay(1500);
-  midServo.write(midServoNeutral + 40);
-  delay(500);
-  topServo.write(topServoMaxLeft);
-  delay(1000);
-  for (pos = topServoMaxLeft; pos <= topServoNeutral; pos += 1) {
-    topServo.write(pos);
-    delay(15);
-  }
-  for (pos = (midServoNeutral + 40); pos >= midServoNeutral; pos -= 1) {
-    midServo.write(pos);
-    delay(15);
-  }
+  delay(600);
+  //midServo.write(midServoNeutral + 10);
+  //delay(600);
+ // topServo.write(topServoMaxRight - 20);
+  //delay(1500);
+  topServo.write(topServoNeutral);
+  delay(600);
+  //midServo.write(midServoNeutral + 30);
+  //delay(500);
+  //topServo.write(topServoMaxLeft + 20);
+  //delay(1500);
+  //midServo.write(midServoNeutral + 40);
+  //delay(500);
+  //topServo.write(topServoMaxLeft);
+  //delay(1000);
+  //for (pos = topServoMaxLeft; pos <= topServoNeutral; pos += 1) {
+    //topServo.write(pos);
+    //delay(15);
+  //}
+  //for (pos = (midServoNeutral + 40); pos >= midServoNeutral; pos -= 1) {
+   // midServo.write(pos);
+    //delay(15);
+  //}
 
-  delay(15);
+  //delay(15);
   baseServo.detach();  
   midServo.detach();
   topServo.detach(); 
 }
 
 void frustration() {
-  
+    baseServo.attach(baseServoPin); 
+    midServo.attach(midServoPin);
+    topServo.attach(topServoPin);
+
     neutral();
-    baseServo.attach(4); 
-    midServo.attach(5);
-    topServo.attach(6);
-    delay(15);
-    midServo.write(midServoMaxForward - 70);
+ 
+    midServo.write(midServoMaxForward);
     delay(300);
     for (pos = topServoMaxLeft; pos <= topServoMaxRight; pos += 4) {
       topServo.write(pos);
@@ -179,106 +206,103 @@ void frustration() {
       topServo.write(pos);
       delay(15);
     }
+    topServo.write(topServoNeutral);
+    
+    for (pos = midServoMaxForward; pos >= midServoNeutral; pos -= 1) {
+      midServo.write(pos);
+      delay(15);
+    }
+
     neutral();
-    delay(200);
-    midServo.write(midServoMaxBack);
-    delay(500);
-    for (pos = (baseServoMaxRight - 45); pos >= (baseServoMaxLeft + 45); pos -= 1) {
-      baseServo.write(pos);
-      delay(15);
-    }
-    delay(100);
-    for (pos = (baseServoMaxLeft + 45); pos <= (baseServoMaxRight - 45); pos += 1) {
-      baseServo.write(pos);
-      midServo.write(midServoMaxBack + pos);
-      delay(15);
-    }
-    delay(100);
-    delay(15);  
+    
     baseServo.detach();  
     midServo.detach();
     topServo.detach(); 
-    neutral();
 }
 
 void hesitancy() {
+  baseServo.attach(baseServoPin); 
+  midServo.attach(midServoPin);
+  topServo.attach(topServoPin);
+
   neutral();
-  baseServo.attach(4); 
-  midServo.attach(5);
-  topServo.attach(6);
-  delay(15);
+  
   midServo.write(midServoMaxBack);
   delay(1000);
-  for (pos = (midServoMaxBack); pos <= (midServoNeutral + 20); pos += 1) {
+  for (pos = midServoMaxBack; pos <= (midServoNeutral); pos += 1) {
     midServo.write(pos);
     delay(15);
   }
   delay(100);
   midServo.write(midServoNeutral);
   delay(500);
-  baseServo.write(baseServoNeutral - 20);
-  delay(100);
-  for (pos = (baseServoNeutral - 20); pos <= baseServoNeutral + 20; pos += 1) {
-    baseServo.write(pos);
-    delay(15);
-  }
-  baseServo.write(baseServoNeutral);
-  delay(500);
-  for (pos = (midServoNeutral); pos <= (midServoNeutral + 40); pos += 1) {
+  //baseServo.write(baseServoNeutral + 20);
+  //delay(100);
+  //for (pos = (baseServoNeutral + 20); pos <= baseServoNeutral + 50; pos += 1) {
+    //baseServo.write(pos);
+    //delay(15);
+  //}
+  //baseServo.write(baseServoNeutral);
+  //delay(500);
+  for (pos = (midServoNeutral); pos <= (midServoNeutral + 20); pos += 1) {
     midServo.write(pos);
     delay(15);
   }
   delay(100);
   midServo.write(midServoNeutral + 20);
   delay(1000);
-  for (pos = (midServoNeutral + 20); pos <= (midServoNeutral + 60); pos += 1) {
-    midServo.write(pos);
-    delay(15);
-  }
-  delay(100);
-  midServo.write(midServoNeutral + 40);
-  delay(1000);
-  for (pos = (midServoNeutral + 40); pos >= midServoNeutral; pos -= 1) {
-    midServo.write(pos);
-    delay(15);
-  }
-  delay(15);  
+  //for (pos = (midServoNeutral + 20); pos <= (midServoNeutral + 60); pos += 1) {
+    //midServo.write(pos);
+    //delay(15);
+  //}
+  //delay(100);
+  //midServo.write(midServoNeutral + 40);
+  //delay(1000);
+  //for (pos = (midServoNeutral + 40); pos >= midServoNeutral; pos -= 1) {
+    //midServo.write(pos);
+    //delay(15);
+  //}
+  //delay(15);  
+
+  neutral();
+  
   baseServo.detach();  
   midServo.detach();
   topServo.detach(); 
 }
 
 void joy() {
+  baseServo.attach(baseServoPin); 
+  midServo.attach(midServoPin);
+  topServo.attach(topServoPin);
+
   neutral();
-  baseServo.attach(4); 
-  midServo.attach(5);
-  topServo.attach(6);
-  delay(15);
+
   midServo.write(midServoMaxBack);
   delay(15);
   for (pos = topServoMaxLeft; pos <= topServoMaxRight; pos += 1) {
     topServo.write(pos);
-    baseServo.write(pos);
+    baseServo.write(pos + 30);
     delay(15);
   }
   for (pos = topServoMaxRight; pos >= topServoMaxLeft; pos -= 1) {
     topServo.write(pos);
-    baseServo.write(pos);
+    baseServo.write(pos + 30);
     delay(15);
     }
   for (pos = topServoMaxLeft; pos <= topServoMaxRight; pos += 1) {
     topServo.write(pos);
-    baseServo.write(pos);
+    baseServo.write(pos + 30);
     delay(15);
     }
   for (pos = topServoMaxRight; pos >= topServoMaxLeft; pos -= 1) {
     topServo.write(pos);
-    baseServo.write(pos);
+    baseServo.write(pos + 30);
     delay(15);
   }
   for (pos = topServoMaxLeft; pos <= topServoNeutral; pos += 1) {
     topServo.write(pos);
-    baseServo.write(pos + 10);
+    baseServo.write(pos + 30);
     delay(15);
   }
   delay(100);
@@ -286,7 +310,10 @@ void joy() {
     midServo.write(pos);
     delay(15);
   }
-  delay(15);  
+  delay(15); 
+
+  neutral();
+  
   baseServo.detach();  
   midServo.detach();
   topServo.detach(); 
@@ -294,55 +321,31 @@ void joy() {
 
 
 void anticipation() {
+  baseServo.attach(baseServoPin); 
+  midServo.attach(midServoPin);
+  topServo.attach(topServoPin);
+
   neutral();
-  baseServo.attach(4); 
-  midServo.attach(5);
-  topServo.attach(6);
-  delay(15);
-  baseServo.write(baseServoNeutral - 40);
+  
+  
+  midServo.write(midServoNeutral + 10);
   delay(500);
-  for (pos = (baseServoNeutral - 40); pos <= baseServoNeutral + 40; pos += 1) {
-    baseServo.write(pos);
+  
+  for (pos = midServoNeutral; pos <= (midServoNeutral + 10); pos += 1) {
+    midServo.write(pos);
     delay(15);
   }
-  baseServo.write(baseServoNeutral);
-  delay(1000);
-  baseServo.write(baseServoNeutral - 20);
-  delay(500);
-  for (pos = (baseServoNeutral - 20); pos <= baseServoNeutral + 20; pos += 1) {
-    baseServo.write(pos);
-    delay(15);
-  }
-  delay(700);
-  baseServo.write(baseServoNeutral);
-  delay(500);
-  midServo.write(midServoMaxBack + 10);
-  delay(500);
-  baseServo.write(baseServoNeutral - 20);
-  delay(500);
-  for (pos = (baseServoNeutral - 20); pos <= baseServoNeutral + 20; pos += 1) {
-    baseServo.write(pos);
-    delay(15);
-  }
-  baseServo.write(baseServoNeutral);
-  delay(500);
-  for (pos = (midServoMaxBack + 10); pos <= midServoNeutral; pos += 1) {
+  for (pos = (midServoMaxBack + 10); pos >= midServoNeutral; pos -= 1) {
     midServo.write(pos);
     delay(15);
   }
   delay(700);
-  baseServo.write(baseServoNeutral - 40);
-  delay(500);
-  for (pos = (baseServoNeutral - 40); pos <= baseServoNeutral + 40; pos += 1) {
-    baseServo.write(pos);
-    delay(15);
-  }
-  baseServo.write(baseServoNeutral);
-  delay(700);
+
+  neutral();
+  
   baseServo.detach();  
   midServo.detach();
   topServo.detach(); 
-  neutral();
 }
 
 

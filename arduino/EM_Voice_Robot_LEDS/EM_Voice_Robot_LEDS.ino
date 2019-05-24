@@ -1,15 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////////////// 
-// This sketch contains lighting animations for a Neopixel 144 LED strip -- 
+// This sketch contains lighting animations for a Neopixel 8 LED strip -- 
 // driving lighting fx triggered over serial for a voice robot prototype
 // created as part of the Emotional Machines project -- 
 // Emma Young & Libby Miller - BBC R&D - emma.young02@bbc.co.uk | libby.miller@bbc.co.uk
-//this version doesn't work!
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Adafruit_NeoPixel.h>
 #define LED_PIN 9
-#define LED_COUNT 144
+#define LED_COUNT 8
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = pin number (most are valid)
@@ -18,44 +17,19 @@
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
-#include <Servo.h>
-
-Servo baseServo;  // create servo object to control a servo
-Servo midServo;
-Servo topServo;
-int pos = 0;    // variable to store the servo position
-
-// RANGE OF MOTION LIMITATIONS 
-// TOPSERVO - NEUTRAL  = 90 | MIN POS (LEFT)  = 50 | MAX POS (RIGHT) = 130 (for symmetry)
-// MIDSERVO - NEUTRAL = 35 | MIN POS (BACK) = 0 | MAX POS (FORWARD) = 180 (reverse mounting)
-// BASE SERVO - NEUTRAL = 90
-int topServoMaxLeft = 50;
-int topServoMaxRight = 130;
-int topServoNeutral = 80;
-
-int midServoMaxBack = 0;
-int midServoMaxForward = 180;
-int midServoNeutral = 35;
-
-int baseServoMaxLeft = 0; // flip if working in reverse on checking
-int baseServoMaxRight = 180; // "
-int baseServoNeutral = 90;
 
 void setup() {
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
   strip.setBrightness(10); // Set BRIGHTNESS to 1/10 (to save your eyes, uncomment if diffusing light)
 
-  baseServo.attach(4);  // attaches the base servo on pin 5 to the servo object
-  midServo.attach(5);
-  topServo.attach(6);
-  
   Serial.begin(115200); //for debugging
   Serial.println("ok");
 }
 void loop() {
-  heartbeat();
-  //checkSerial();
+  //heartbeat();
+  //night();
+  checkSerial();
 }
 
 String str;
@@ -68,17 +42,33 @@ void checkSerial(){
         Serial.println(str);
         String val = getValue(str, ' ', 0);
         int command = val.toInt();
-        if(command == 6){
-          Serial.println("cold light invoked");
-          cold();    
+        if(command == 7){
+          Serial.println("night light invoked");
+          night();    
         }
-        else if(command == 7){
-          Serial.println("warm light invoked");
-          warm();
+        else if(command == 8){
+          Serial.println("frustration light invoked");
+          frustration();
         }
-        else if(command == 1){
+        else if(command == 9){
+          Serial.println("hesitancy light invoked");
+          hesitancy();
+        }
+        else if(command == 10){
+          Serial.println("joy light invoked");
+          joy();
+        }
+        else if(command == 11){
+          Serial.println("anticipation light invoked");
+          anticipation();
+        }
+        else if(command == 12){
+          Serial.println("curiosity light invoked");
+          curiosity();
+        }
+        else if(command == 0){
           Serial.println("heartbeat again");
-          warm();
+          heartbeat();
         }
         else {
           Serial.println("no serial value for light received");  
@@ -97,11 +87,22 @@ void heartbeat(){
     strip.show();
     delay(5);
     checkSerial();
-    // cold(); 
-    // warm();
   } 
 }
 
+void night(){
+  for (int i = 0; i < 65535; i++) {
+    //float intensity = 25;
+    float intensity = 127 /2.0 * (1.0 + sin(0.01 * i));
+    strip.setBrightness(intensity);
+    for(int j=0; j<strip.numPixels(); j++) {
+      strip.setPixelColor(j, 0, 0, 255);
+    }
+    strip.show();
+    delay(5);
+    checkSerial();
+  } 
+}
 void cold() {
   for(int j=0; j<strip.numPixels(); j++) { //to scale for any number of pixels in strip
       strip.setPixelColor(j, 0, 0, 255); //add extra blue to increasing brightness
@@ -134,108 +135,93 @@ String getValue(String data, char separator, int index)
     return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-/*void hesitancy(){
-    delay(20); //Short delay to debounce button
-    bool newStateButton1 = digitalRead(BUTTON_PIN_1); // Check if button is still low after debounce
-    if(newStateButton1 == LOW){
-      strip.clear();
-      strip.show();
-      creepAndRetreat(strip.Color(200, 225, 0), 4); // yellow-green, pass limit (pixel to wipe to)
-      delay(500);
-      creepAndRetreat(strip.Color(200, 225, 0), 6);
-      delay(500);
-      creepAndRetreat(strip.Color(200, 225, 0), 4); // yellow-green, pass limit (pixel to wipe to)
-      delay(500);
-      creepAndRetreat(strip.Color(200, 225, 0), 6);
-      delay(500);
-      strip.clear();
-      strip.show();
-    }
+void hesitancy(){
+  strip.clear();
+  strip.show();
+  creepAndRetreat(strip.Color(200, 225, 0), 4); // yellow-green, pass limit (pixel to wipe to)
+  delay(500);
+  creepAndRetreat(strip.Color(200, 225, 0), 6);
+  delay(500);
+  creepAndRetreat(strip.Color(200, 225, 0), 4); // yellow-green, pass limit (pixel to wipe to)
+  delay(500);
+  creepAndRetreat(strip.Color(200, 225, 0), 6);
+  delay(500);
+  strip.clear();
+  strip.show();
+  checkSerial();
 }
 
 void joy(){
-    delay(20); //Short delay to debounce button
-    bool newStateButton2 = digitalRead(BUTTON_PIN_2); // Check if button is still low after debounce
-    if(newStateButton2 == LOW){
-      strip.clear();
-      strip.show();
-      for(int i=0; i<4; i++){ 
-        colorWipe(strip.Color(255, 5, 5), 10); // Light Red
-        delay(100);
-        reverseWipe(strip.Color(255, 128, 0), 50); // Orange
-        delay(100);
-        colorWipe(strip.Color(240, 160, 0), 5); // Light Yellow
-        delay(100);
-        reverseWipe(strip.Color(255, 128, 0), 50); // Orange
-        delay(100);
-      }
-      strip.clear();
-      strip.show();
-    } 
+  strip.clear();
+  strip.show();
+  for(int i=0; i<4; i++){ 
+    colorWipe(strip.Color(255, 5, 5), 10); // Light Red
+    delay(100);
+    reverseWipe(strip.Color(255, 128, 0), 50); // Orange
+    delay(100);
+    colorWipe(strip.Color(240, 160, 0), 5); // Light Yellow
+    delay(100);
+    reverseWipe(strip.Color(255, 128, 0), 50); // Orange
+    delay(100);
+    }
+ strip.clear();
+ strip.show();
+ checkSerial(); 
 }
 
 void curiosity(){
-    delay(20); //Short delay to debounce button
-    bool newStateButton3 = digitalRead(BUTTON_PIN_3); // Check if button is still low after debounce
-    if(newStateButton3 == LOW){
-      strip.clear();
-      strip.show();
-      creep(strip.Color(127, 127, 127), 1000); // White, half brightness
-      delay (400);
-      pulse();
-      delay(400);
-      strip.clear();
-      delay(400);
-      strip.clear();
-      strip.show();
-    }
+  strip.clear();
+  strip.show();
+  creep(strip.Color(127, 127, 127), 1000); // White, half brightness
+  delay (400);
+  pulse();
+  delay(400);
+  strip.clear();
+  delay(400);
+  strip.clear();
+  strip.show();
+  checkSerial();
 }
 
 void frustration(){
-    delay(20); //Short delay to debounce button
-    bool newStateButton4 = digitalRead(BUTTON_PIN_4); // Check if button is still low after debounce
-    if(newStateButton4 == LOW){
-      strip.clear();
-      strip.show();
-      colorWipe(strip.Color(255, 0, 0), 30); // red
-      colorWipe(strip.Color(0, 0, 0), 50); // off
-      firstPixelFlash(strip.Color(255, 0, 255)); // purple
-      delay(400);
-      lastPixelFlash(strip.Color(202, 229, 0)); // yellow-green
-      delay(50);
-      colorWipe(strip.Color(255, 5, 5), 30); // dark red
-      colorWipe(strip.Color(0, 0, 0), 50);
-      lastHalfFlash(strip.Color(255, 0, 255)); // purple
-      delay(500);
-      firstHalfFlash(strip.Color(202, 229, 0)); // yellow-green
-      delay(200);
-      lastHalfFlash(strip.Color(255, 0, 255)); // purple
-      delay(200);
-      colorWipe(strip.Color(255, 0, 0), 30); // red
-      colorWipe(strip.Color(0, 0, 0), 50);
-      firstHalfFlash(strip.Color(202, 229, 0)); // yellow-green
-      delay(100);
-      strip.clear();
-      strip.show();
-    }
+  strip.clear();
+  strip.show();
+  colorWipe(strip.Color(255, 0, 0), 30); // red
+  colorWipe(strip.Color(0, 0, 0), 50); // off
+  firstPixelFlash(strip.Color(255, 0, 255)); // purple
+  delay(400);
+  lastPixelFlash(strip.Color(202, 229, 0)); // yellow-green
+  delay(50);
+  colorWipe(strip.Color(255, 5, 5), 30); // dark red
+  colorWipe(strip.Color(0, 0, 0), 50);
+  lastHalfFlash(strip.Color(255, 0, 255)); // purple
+  delay(500);
+  firstHalfFlash(strip.Color(202, 229, 0)); // yellow-green
+  delay(200);
+  lastHalfFlash(strip.Color(255, 0, 255)); // purple
+  delay(200);
+  colorWipe(strip.Color(255, 0, 0), 30); // red
+  colorWipe(strip.Color(0, 0, 0), 50);
+  firstHalfFlash(strip.Color(202, 229, 0)); // yellow-green
+  delay(100);
+  strip.clear();
+  strip.show();
+  checkSerial();
 }
 
 void anticipation(){
-    delay(20); //Short delay to debounce button
-    bool newStateButton5 = digitalRead(BUTTON_PIN_5); // Check if button is still low after debounce
-    if(newStateButton5 == LOW){
-      strip.clear();
-      strip.show();
-      for(int i=0; i<4; i++){
-        beat();
-        delay(150);
-        pulse();
-        delay(400);
-        strip.clear();         //   Set all pixels in RAM to 0 (off)
-      }
-      strip.clear();
-      strip.show();
-    }
+  strip.clear();
+  strip.show();
+  for(int i=0; i<4; i++){
+    beat();
+    delay(150);
+    pulse();
+    delay(400);
+    strip.clear();         //   Set all pixels in RAM to 0 (off)
+  }
+  strip.clear();
+  strip.show();
+  checkSerial();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -384,4 +370,4 @@ void beat(){
     strip.setPixelColor(1, 0, 0, 0);
     strip.show();
     delay(150);
-}*/
+}
