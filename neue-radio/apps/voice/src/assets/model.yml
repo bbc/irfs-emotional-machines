@@ -8,7 +8,7 @@ data: |
   - beeb
   - hey beeb
 
-  ## intent:bad_robot
+  ## intent:stupid_robot
   - stupid robot
   - bad robot
   - shut up
