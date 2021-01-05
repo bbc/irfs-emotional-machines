@@ -10,7 +10,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "http": "^0.0.0",
     "notifyjs": "^3.0.0"
   }
